@@ -36,20 +36,22 @@ var List=mongoose.model('List');
 var User=mongoose.model('User');
 var Room=mongoose.model('Room');
 
-app.get('/', function(req, res){  
+
+
+app.get('/', function(req, res){ 
 res.render('index',{user:req.user});
 });
  app.get('/signup',function(req,res){
   if(!req.user)
     res.render('signup');
   else
-    res.render('index',{user:req.user});
+    res.redirect('/');
  });
  app.get('/login',function(req,res){
   if(!req.user)
     res.render('login');
   else
-    res.render('index',{user:req.user});
+    res.redirect('/');
  });
 app.get('/chatters',function(req,res,next){
   List.find(function(err,docs){
@@ -98,8 +100,12 @@ var flag=0;
     }    
   });
 });
+app.param('chat',function(req,res,next,chat){
+  req.chat=chat;
+  return next();
+});
 app.get('/chat/:chat',function(req,res,next){
-  res.render('chat',{user:req.user});
+  res.render('chat',{user:req.user,id:req.chat});
 })
 
  passport.use(new LocalStrategy(function(username, password, done) {
@@ -139,7 +145,7 @@ app.post('/login', function(req, res, next) {
     }
     req.logIn(user, function(err, info) {
       if (err) return next(err);
-      console.log("object: %O",req.user);
+      console.log(JSON.stringify(req.user));
       req.flash('info','Hey '+ user.username +' Logged In Successfully!!');
       return res.redirect('/'); 
     });
@@ -165,50 +171,54 @@ app.get('/logout', function(req, res){
   req.logout();
   res.redirect('/');
 });
-//  var users=[];
-// io.on('connection', function(socket){ 
-// 	socket.on("user",function(username){
-// 		users.push({id:socket.id,user_name:username});
-// 		console.log(socket.id);
-		
-// 		//socket.emit('chatMessage', 'System', '<b>' + username + '</b> has joined the discussion');
-// 	});
+ var users={};
+io.on('connection', function(socket){ 
+	socket.on("user",function(_id){
+    //console.log(JSON.stringify(req.user1));
+    console.log("socket",_id);
+    if(_id in users)
+		  users[_id].push(socket.id);
+    else
+		  users[_id]=[socket.id];
+    // console.log(JSON.stringify(users[_id]));
+	  console.log(users[_id]);	
+		// socket.emit('chatMessage', 'System', '<b>' + username + '</b> has joined the discussion');
+	});
 
-//   // socket.on('chatMessage', function(from, msg){
-//   //   io.emit('chatMessage', from, msg);
-//   // });
-//   socket.on('chatMessage', function(to,from, msg){
-//   	var id="",selfid="";
-//   	for(var i=0;i<users.length;i++)
-//   	{
-//   		// console.log("hey");
-//   		if(users[i].user_name==to)
-//   		{
-//         console.log("to", users[i].user_name );
-//   			id=users[i].id;
-//         socket.broadcast.to(id).emit('chatMessage',to,from, msg);
-//   			// console.log("found");
-//   			// break;
-//   		}
-//   		if(users[i].user_name==from)
-//   		{
-//         console.log("from");
-//   			selfSocketId = users[i].id;
-//         console.log(users, '>>>>>>Users')
-//         socket.broadcast.to(selfSocketId).emit('chatMessage',to,from, msg);
-//   			// console.log("found");
-//   			// break;	
-//   		}
-//   	}
-//     // socket.broadcast.to(id).emit('chatMessage',to,from, msg);
-//     //socket.broadcast.to(selfid).emit('chatMessage',to,from, msg);
+  // socket.on('chatMessage', function(from, msg){
+  //   io.emit('chatMessage', from, msg);
+  // });
+  socket.on('chatMessage', function(_id,from,msg){
+  	// var id="",selfid="";
+    console.log(from);
+  	for(var i=0;i<users[_id].length;i++)
+  	{
+
+        // console.log("to", users[i].user_name );
+        console.log(users[_id][i]);
+        socket.broadcast.to(users[_id][i]).emit('chatMessage',from, msg);
+  			// console.log("found");
+  			// break;
+  		}
+  		// if(users[i].user_name==req.user1)
+  		// {
+    //     console.log("from");
+  		// 	selfSocketId = users[i].id;
+    //     console.log(users, '>>>>>>Users')
+    //     socket.broadcast.to(selfSocketId).emit('chatMessage',to,from, msg);
+  		// 	// console.log("found");
+  		// 	// break;	
+  		// }
+  	// }
+    // socket.broadcast.to(id).emit('chatMessage',to,from, msg);
+    //socket.broadcast.to(selfid).emit('chatMessage',to,from, msg);
   
-//   });
+  });
   
-// socket.on('notifyUser', function(user){
-//     io.emit('notifyUser', user); 
+// socket.on('notifyUser', function(){
+//     io.emit('notifyUser', req.user2); 
 //   });
-// });
+});
 
  http.listen(3000, function(){
   console.log('listening on *:3000');

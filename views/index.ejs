@@ -1,0 +1,22 @@
+<!doctype html>
+  <html>
+   <head>
+    <title>Chat Application</title>
+    <link rel='stylesheet' href='/stylesheets/style.css' type='text/css'/>
+   
+    <script src="http://code.jquery.com/jquery-1.11.1.js"></script>
+    <!-- <script src="/javascripts/chat.js"></script> -->
+  </head>
+  
+  <body> 
+  <%if(user){
+  %>
+  <p> welcome <b> <%= user.username%></b></p>
+  <a href="/chatters">go to chat</a>
+  <a href="/logout">logout</a>
+  <%}else {%> 
+  <a href="/signup">signup</a> 
+  <a href="/login">login</a>
+  <%}%>
+  </body>
+</html>

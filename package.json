@@ -1,0 +1,27 @@
+{
+  "name": "dbchat",
+  "version": "0.0.1",
+  "description": "chat with history app",
+  "dependencies": {
+"async": "*",
+    "bcrypt-nodejs": "*",
+    "express-flash": "*",
+    "express-session": "*",
+    "nodemailer": "*",
+    "body-parser": "*",
+    "cookie-parser": "*",
+    "debug": "*",
+    "ejs": "*",
+    "express": "*",
+    "express-jwt": "*",
+    "jsonwebtoken": "*",
+    "jwt-express": "*",
+    "mongoose": "*",
+    "morgan": "*",
+    "passport": "*",
+    "passport-local": "*",
+    "serve-favicon": "*",
+    "socket.io":"*",
+    "flash":"*"
+  }
+}

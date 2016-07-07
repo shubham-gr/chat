@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title></title>
+</head>
+<body>
+<% if(user) {%><p> welcome <b> <%= user.username%></b></p><%}%>
+<h3>list of users</h3>
+<% if( Array.isArray(listUser) ) {
+	listUser.forEach( function( docs ){
+		if(docs.username!=user.username){
+		%>
+			<a href="/user1/<%=user.username%>/user2/<%=docs.username%>/"><%=docs.username %></a>
+	<%}});
+}%>
+
+</body>
+</html>

@@ -6,13 +6,15 @@
     <script src="https://cdn.socket.io/socket.io-1.2.0.js"></script>
     <script src="http://code.jquery.com/jquery-1.11.1.js"></script>
     <script src="/javascripts/chat.js"></script>
+   
   </head>
   
   <body> 
   <p>username:</p><p id="user" value="<%if(user)%><%= user.username%>"><%if(user)%><%= user.username%></p>
   
   <input id="id" type="hidden" value="<%= id %>">
-    <div><ul id="messages"></ul>
+    <div><ul id="messages">
+    </ul>
     <span id="notifyUser"></span>
     </div>
     <form id="form" action="" onsubmit="return submitfunction();" > 
@@ -20,4 +22,21 @@
       <input type="submit" id="button" value="Send"/> 
     </form>
   </body>
+   <script type="text/javascript">
+      var message= <%- JSON.stringify(message) %>;
+      for( var i in  message )
+      {
+        // console.log(message[i].senderName);
+        var me = document.getElementById('user').innerHTML;
+        // var me = $('#user').val();
+        // console.log(me,);
+        var color = (message[i].senderName== me) ? 'green' : '#009afd';
+        var backgroundcolor=(message[i].senderName== me) ? '#18ffff' : '#4fc3f7';
+        var float=(message[i].senderName==me)? 'right' : 'left';
+        var from = (message[i].senderName == me) ? 'Me' : message[i].senderName;
+        $('#messages').append('<li style="display:block;background:'+backgroundcolor+'; float :'+float+'"><b style="color:' + color + '">' + from + '</b>: ' + message[i].message + '</li><br>');
+
+      }
+      
+    </script>
 </html>

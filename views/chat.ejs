@@ -5,13 +5,16 @@
     <link rel='stylesheet' href='/stylesheets/style.css' type='text/css'/>
     <script src="https://cdn.socket.io/socket.io-1.2.0.js"></script>
     <script src="http://code.jquery.com/jquery-1.11.1.js"></script>
+    <script type="text/javascript">
+      if (!JSON.stringify( <%= user %>)) {window.location.assign("/");}
+    </script>
     <script src="/javascripts/chat.js"></script>
-   
+    
   </head>
   
   <body> 
   <p>username:</p><p id="user" value="<%if(user)%><%= user.username%>"><%if(user)%><%= user.username%></p>
-  
+  <button id="logout">Logout</button>
   <input id="id" type="hidden" value="<%= id %>">
     <div><ul id="messages">
     </ul>

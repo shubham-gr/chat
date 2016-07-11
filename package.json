@@ -2,6 +2,9 @@
   "name": "dbchat",
   "version": "0.0.1",
   "description": "chat with history app",
+  "scripts":{
+    "start" : "node index.js"
+  },
   "dependencies": {
 "async": "*",
     "bcrypt-nodejs": "*",

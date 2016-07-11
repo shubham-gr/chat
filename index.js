@@ -40,49 +40,69 @@ var Message=mongoose.model('Message');
 
 
 app.get('/', function(req, res){ 
-res.render('index',{user:req.user});
+  res.render('index',{user:req.user});
 });
- app.get('/signup',function(req,res){
+
+
+app.get('/signup',function(req,res){
   if(!req.user)
     res.render('signup');
   else
     res.redirect('/');
- });
- app.get('/login',function(req,res){
+});
+
+
+app.get('/login',function(req,res){
   if(!req.user)
     res.render('login');
   else
     res.redirect('/');
- });
+});
+
+
 app.get('/chatters',function(req,res,next){
-  List.find(function(err,docs){
-    if (err) {
-      return next(err);
-    }
-    res.render('chatters',{listUser:docs,user:req.user });
-  });
-})
+  if(req.user)
+  {
+    User.find({},{"username":true,"_id":false},function(err,docs){
+      if (err) {
+        return next(err);
+      }
+      console.log(docs);
+      return res.render('chatters',{listUser:docs,user:req.user });
+    });
+  }
+  else
+  {
+    return res.redirect('/');
+  }
+});
+
+
 app.param('user1',function(req,res,next,user1){
     req.user1=user1;
     return next();
-  });
+});
 
-app.param('user2',function(req,res,next,user2){
+app.param('user2',function(req,res,next,user2)
+{
     req.user2=user2;
     return next();
-  });
-app.get('/user1/:user1/user2/:user2',function(req,res,next){
-var flag=0;
- Room.find(function(err,docs){
-    if(err)return next(err);
+});
+app.get('/user1/:user1/user2/:user2',function(req,res,next)
+{
+  var flag=0;
+  Room.find(function(err,docs)
+  {
+    if(err)
+      return next(err);
     for(var i=0;i<docs.length;i++)
     {
-        if((docs[i].user1==req.user1 || docs[i].user1==req.user2 )&& (docs[i].user2==req.user1 || docs[i].user2==req.user2))
-        {
-            flag=1;
-            var ur='/chat/'+docs[i]._id+'/';
-            return res.redirect(ur);
-        }
+      if((docs[i].user1==req.user1 || docs[i].user1==req.user2 )&& (docs[i].user2==req.user1 || docs[i].user2==req.user2))
+      {
+        flag=1;
+        var ur='/chat/'+docs[i]._id+'/';
+        return res.redirect(ur);
+      }
     }
     if(!flag)
     {
@@ -91,33 +111,45 @@ var flag=0;
       room.user2=req.user2;
       room.save(function(err,docs)
       {
-        if (err) {next(err);}
-      console.log(JSON.stringify(docs));
-            var ur='/chat/'+docs._id+'/';
-            return res.redirect(ur);
+        if (err)
+        {
+          next(err);
+        }
+        var ur='/chat/'+docs._id+'/';
+        return res.redirect(ur);
       });
-      
-      // return res.redirect('/chat/'+docs._id+'/');
     }    
   });
 });
+
+
 app.param('chat',function(req,res,next,chat){
   req.chat=chat;
   return next();
 });
-app.get('/chat/:chat',function(req,res,next){
-  Message.find({"room":req.chat},function(err,messages)
-  {
-    if(err)return next(err);
-      console.log(JSON.stringify(messages));
+
+
+app.get('/chat/:chat',function(req,res,next)
+{
+  if(req.user){
+    Message.find({"room":req.chat},function(err,messages)
+    {
+      if(err)
+        return next(err);
+      // console.log(JSON.stringify(messages));
       return res.render('chat',{user:req.user,id:req.chat,message:messages});
-  }).sort({"date":1})
-  
+    }).sort({"date":1})
+  }
+  else {
+    return res.redirect('/');
+  }
 })
 
- passport.use(new LocalStrategy(function(username, password, done) {
+
+passport.use(new LocalStrategy(function(username, password, done) {
   User.findOne({ username: username }, function(err, user, error) {
-    if (err) return done(err);
+    if (err)
+     return done(err);
     if (!user){
       //req.flash('error','sorry incorrect username ');
       return done(null, false, { messages: 'Incorrect username.' });
@@ -133,9 +165,12 @@ app.get('/chat/:chat',function(req,res,next){
   });
 
 }));
+
+
 passport.serializeUser(function(user, done) {
   done(null, user.id);
 });
+
 
 passport.deserializeUser(function(id, done) {
   User.findById(id, function(err, user) {
@@ -143,16 +178,19 @@ passport.deserializeUser(function(id, done) {
   });
 });
 
+
 app.post('/login', function(req, res, next) {
   passport.authenticate('local', function(err,user, info) {
-    if (err) return next(err); 
+    if (err)
+     return next(err); 
     if (!user) {
       req.flash('info','sorry information is not correct'); 
       return res.redirect('/')
     }
     req.logIn(user, function(err, info) {
-      if (err) return next(err);
-      console.log(JSON.stringify(req.user));
+      if (err) 
+        return next(err);
+      // console.log(JSON.stringify(req.user));
       req.flash('info','Hey '+ user.username +' Logged In Successfully!!');
       return res.redirect('/'); 
     });
@@ -160,93 +198,81 @@ app.post('/login', function(req, res, next) {
 });
 app.post('/signup', function(req, res) {
   var user = new User();
-  var list=new List();
-  list.username=req.body.username;
-  user.username=req.body.username;user.email=req.body.email;user.password=req.body.password;
+  user.username=req.body.username;
+  user.email=req.body.email;
+  user.password=req.body.password;
   user.save(function(err,docs) {
-    console.log(JSON.stringify(docs));
-    list.save(function(err){
     req.logIn(user, function(err,success) {
       console.log(req.user);
       req.flash('success','Hello '+ user.username +' Welcome to CareForYou!!');
       return res.redirect('/');
     });
   });
-  });
 });
+
+
 app.get('/logout', function(req, res){
   req.logout();
   res.redirect('/');
 });
- var users={};
-io.on('connection', function(socket){ 
-	socket.on("user",function(_id){
-    //console.log(JSON.stringify(req.user1));
-    console.log("socket",_id);
-   users[socket.id]=_id;
-   //  if(_id in users)
-		 //  users[_id].push(socket.id);
-   //  else
-		 //  users[_id]=[socket.id];
-   //  // console.log(JSON.stringify(users[_id]));
-	  // console.log(users[_id]);	
-		// socket.emit('chatMessage', 'System', '<b>' + username + '</b> has joined the discussion');
-	});
 
-  // socket.on('chatMessage', function(from, msg){
-  //   io.emit('chatMessage', from, msg);
-  // });
+
+var users={};
+io.on('connection', function(socket){ 
+  
+
+  socket.on("user",function(_id,name){
+    console.log("socket",_id);
+   users[socket.id]={id:_id,userName:name};
+	});
+  
+
+
   socket.on('chatMessage', function(_id,from,msg){
-  	// var id="",selfid="";
-    //console.log(from);
-  var query=Room.findById(_id);
-  query.exec(function(err,room){
-    if(err)return next(err);
-    if(!room) return next(new Error('cant found the given room'));
-    var message=new Message();
-    message.senderName=from;
-    message.message=msg;
-    message.room=_id;   
-    message.save(function(err,message)
-    {
-      if (err) {return err;}
-      console.log(JSON.stringify(message._id));
+    var query=Room.findById(_id);
+    query.exec(function(err,room){
+      if(err)
+        return next(err);
+      if(!room) 
+        return next(new Error('cant found the given room'));
+      var message=new Message();
+      message.senderName=from;
+      message.message=msg;
+      message.room=_id;   
+      message.save(function(err,message)
+      {
+        if (err) {return err;}
+        console.log(JSON.stringify(message._id));
+      });
     });
-  });
-    
   	for(var i in users)
   	{
-        if (users[i]==_id) 
+        if (users[i].id==_id) 
         {
           console.log(i," ",users[i]);
           socket.broadcast.to(i).emit('chatMessage',from, msg);
   			}
-        // console.log("to", users[i].user_name );
-        // console.log(users[_id][i]);
-        // console.log("found");
-  			// break;
-  		}
-  		// if(users[i].user_name==req.user1)
-  		// {
-    //     console.log("from");
-  		// 	selfSocketId = users[i].id;
-    //     console.log(users, '>>>>>>Users')
-    //     socket.broadcast.to(selfSocketId).emit('chatMessage',to,from, msg);
-  		// 	// console.log("found");
-  		// 	// break;	
-  		// }
-  	// }
-    // socket.broadcast.to(id).emit('chatMessage',to,from, msg);
-    //socket.broadcast.to(selfid).emit('chatMessage',to,from, msg);
-  
+  		}  
   });
+
+
+  socket.on('logout',function(){
+    for(var i in users)
+      if(users[i].userName==users[socket.id].userName)
+      {
+        console.log("running");
+        socket.broadcast.to(i).emit("sessionEnd");
+        // delete users[i];
+      }
+  });
+  
   socket.on('disconnect',function(){
     console.log("disconnect",socket.id);
     delete users[socket.id];
     for(var i in users){
       console.log(i," ",users[i]);
     }
-  })
+  });
   // socket.on('notifyUser', function(){
   //   io.emit('notifyUser', req.user2); 
   // });

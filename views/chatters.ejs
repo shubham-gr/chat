@@ -3,14 +3,20 @@
 <head>
 	<title></title>
 </head>
+<script type="text/javascript">
+	if (!JSON.stringify( <%= user %>)) {window.location.assign("/");}
+
+</script>
 <body>
+
 <% if(user) {%><p> welcome <b> <%= user.username%></b></p><%}%>
+<a type="button" href="/logout">logout</a>
 <h3>list of users</h3>
 <% if( Array.isArray(listUser) ) {
 	listUser.forEach( function( docs ){
 		if(docs.username!=user.username){
 		%>
-			<a href="/user1/<%=user.username%>/user2/<%=docs.username%>/"><%=docs.username %></a>
+			<a href="/user1/<%=user.username%>/user2/<%=docs.username%>/"><%=docs.username %></a><br>
 	<%}});
 }%>
 

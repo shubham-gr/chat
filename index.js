@@ -16,7 +16,8 @@ var bcrypt = require('bcrypt-nodejs');
 var async = require('async');
 var crypto = require('crypto');
 var mongoose=require("mongoose");
-mongoose.connect("mongodb://localhost/chat");
+mongoose.connect("mongodb://spatwa:spatwa@ds015915.mlab.com:15915/shubham
+");
 require('./models/user');
 require('./models/list');
 require('./models/room');
